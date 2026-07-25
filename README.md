@@ -1,12 +1,18 @@
-# Backend de Turnos y Reservas
+# API inicial de servicios y reservas con FileSystem
 
 ## Objetivo
 
-Construir una API REST con Express que exponga endpoints para gestionar el recurso `services`, conectando las rutas con el `ServiceManager` de la entrega anterior.
+Crear una API REST simple con Express y persistencia en archivos JSON para gestionar servicios y reservas.
 
 ## Descripción
 
-Esta aplicación ofrece una API para crear, leer, actualizar y eliminar servicios. El almacenamiento se realiza en el archivo JSON real del repositorio en `src/data/services.json` y la lógica de negocio está centralizada en `src/managers/ServiceManager.js`.
+Esta aplicación ofrece una API básica para:
+
+- gestionar servicios (`services`)
+- gestionar reservas (`bookings`)
+- almacenar datos en archivos JSON en `src/data`
+
+La lógica de negocio está centralizada en `src/services/ServiceManager.js` y `src/services/BookingManager.js`.
 
 ## Tecnologías
 
@@ -42,7 +48,9 @@ npm start
 - `src/server.js`: arranca el servidor Express.
 - `src/app.js`: configura Express y monta las rutas.
 - `src/routes/services.router.js`: define los endpoints de `services`.
-- `src/managers/ServiceManager.js`: gestiona la lógica de servicios y persiste en `src/data/services.json`.
+- `src/routes/bookings.router.js`: define los endpoints de `bookings`.
+- `src/services/ServiceManager.js`: gestiona la lógica de servicios y persiste en `src/data/services.json`.
+- `src/services/BookingManager.js`: gestiona la lógica de reservas y persiste en `src/data/bookings.json`.
 
 ## Endpoints de `services`
 
@@ -114,10 +122,45 @@ curl -X POST http://localhost:8080/api/services \
 - Método: `DELETE`
 - Ruta: `/api/services/:sid`
 
+## Endpoints de `bookings`
+
+Base: `/api/bookings`
+
+### Crear una reserva
+
+- Método: `POST`
+- Ruta: `/api/bookings`
+- Body JSON obligatorio:
+
+```json
+{
+  "clientName": "Juan Pérez",
+  "clientEmail": "juan@example.com",
+  "date": "2026-08-01",
+  "time": "14:30",
+  "status": "pending",
+  "services": []
+}
+```
+
+El campo `services` puede omitirse o enviarse como arreglo vacío.
+
+### Obtener una reserva por id
+
+- Método: `GET`
+- Ruta: `/api/bookings/:bid`
+
+### Agregar un servicio a una reserva
+
+- Método: `POST`
+- Ruta: `/api/bookings/:bid/services/:sid`
+
+Si el servicio ya existe en la reserva, se incrementa su `quantity`.
+
 ## Códigos de respuesta
 
-- `201` en `POST` cuando se crea un servicio.
-- `404` si no existe el `sid` en `GET`, `PUT` o `DELETE`.
+- `201` en `POST` cuando se crea un servicio o una reserva.
+- `404` si no existe el `sid` en `GET`, `PUT` o `DELETE` de servicios, o si no existe `bid`/`sid` en reservas.
 - `400` cuando falta el body o hay datos inválidos.
 
 ## Validaciones principales
