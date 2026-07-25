@@ -1,6 +1,6 @@
 import express from 'express';
-import { ServiceManager } from './services/ServiceManager.js';
-import { BookingManager } from './services/BookingManager.js';
+import { ServiceManager } from './managers/ServiceManager.js';
+import { BookingManager } from './managers/BookingManager.js';
 import { createServicesRouter } from './routes/services.router.js';
 import { createBookingsRouter } from './routes/bookings.router.js';
 
