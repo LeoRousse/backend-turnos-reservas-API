@@ -12,7 +12,7 @@ Esta aplicación ofrece una API básica para:
 - gestionar reservas (`bookings`)
 - almacenar datos en archivos JSON en `src/data`
 
-La lógica de negocio está centralizada en `src/services/ServiceManager.js` y `src/services/BookingManager.js`.
+La lógica de negocio está centralizada en `src/managers/ServiceManager.js` y `src/managers/BookingManager.js`, mientras que los endpoints se organizan con routers y controllers.
 
 ## Tecnologías
 
@@ -49,8 +49,10 @@ npm start
 - `src/app.js`: configura Express y monta las rutas.
 - `src/routes/services.router.js`: define los endpoints de `services`.
 - `src/routes/bookings.router.js`: define los endpoints de `bookings`.
-- `src/services/ServiceManager.js`: gestiona la lógica de servicios y persiste en `src/data/services.json`.
-- `src/services/BookingManager.js`: gestiona la lógica de reservas y persiste en `src/data/bookings.json`.
+- `src/controllers/services.controller.js`: procesa `req` y responde para `services`.
+- `src/controllers/bookings.controller.js`: procesa `req` y responde para `bookings`.
+- `src/managers/ServiceManager.js`: gestiona la lógica de servicios y persiste en `src/data/services.json`.
+- `src/managers/BookingManager.js`: gestiona la lógica de reservas y persiste en `src/data/bookings.json`.
 
 ## Endpoints de `services`
 

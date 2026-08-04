@@ -10,7 +10,7 @@ export const bookingManager = await BookingManager.create(serviceManager);
 export const expressApp = express();
 expressApp.use(express.json());
 expressApp.use('/api/services', createServicesRouter(serviceManager));
-expressApp.use('/api/bookings', createBookingsRouter(bookingManager));
+expressApp.use('/api/bookings', createBookingsRouter(bookingManager, serviceManager));
 
 export const app = {
   name: 'Sistema Backend de Turnos y Reservas',
