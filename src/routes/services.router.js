@@ -9,14 +9,14 @@ import {
   updateService,
 } from '../controllers/services.controller.js';
 
-export function createServicesRouter(serviceManager) {
+export function createServicesRouter(servicesService) {
   const router = Router();
 
-  router.get('/', getServices(serviceManager));
-  router.get('/:sid', getServiceById(serviceManager));
-  router.post('/', createService(serviceManager));
-  router.put('/:sid', updateService(serviceManager));
-  router.delete('/:sid', deleteService(serviceManager));
+  router.get('/', getServices(servicesService));
+  router.get('/:sid', getServiceById(servicesService));
+  router.post('/', createService(servicesService));
+  router.put('/:sid', updateService(servicesService));
+  router.delete('/:sid', deleteService(servicesService));
 
   return router;
 }

@@ -5,12 +5,12 @@ import {
   getBookingById,
 } from '../controllers/bookings.controller.js';
 
-export function createBookingsRouter(bookingManager, serviceManager) {
+export function createBookingsRouter(bookingsService, servicesService) {
   const router = Router();
 
-  router.post('/', createBooking(bookingManager));
-  router.get('/:bid', getBookingById(bookingManager));
-  router.post('/:bid/services/:sid', addServiceToBooking(bookingManager, serviceManager));
+  router.post('/', createBooking(bookingsService));
+  router.get('/:bid', getBookingById(bookingsService));
+  router.post('/:bid/services/:sid', addServiceToBooking(bookingsService, servicesService));
 
   return router;
 }

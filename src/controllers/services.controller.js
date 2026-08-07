@@ -1,6 +1,6 @@
-export function getServices(serviceManager) {
-  return (req, res) => {
-    let services = serviceManager.getServices();
+export function getServices(servicesService) {
+  return async (req, res) => {
+    let services = await servicesService.getServices();
 
     const { category, available } = req.query;
     if (category) {
@@ -16,10 +16,10 @@ export function getServices(serviceManager) {
   };
 }
 
-export function getServiceById(serviceManager) {
-  return (req, res) => {
+export function getServiceById(servicesService) {
+  return async (req, res) => {
     try {
-      const service = serviceManager.getServiceById(req.params.sid);
+      const service = await servicesService.getServiceById(req.params.sid);
       if (!service) {
         return res.status(404).json({ error: 'Servicio no encontrado' });
       }
@@ -30,14 +30,14 @@ export function getServiceById(serviceManager) {
   };
 }
 
-export function createService(serviceManager) {
+export function createService(servicesService) {
   return async (req, res) => {
     try {
       if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: 'Body requerido' });
       }
 
-      const service = await serviceManager.addService(req.body);
+      const service = await servicesService.addService(req.body);
       return res.status(201).json(service);
     } catch (error) {
       return res.status(400).json({ error: error.message });
@@ -45,14 +45,14 @@ export function createService(serviceManager) {
   };
 }
 
-export function updateService(serviceManager) {
+export function updateService(servicesService) {
   return async (req, res) => {
     try {
       if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: 'Body requerido' });
       }
 
-      const updatedService = await serviceManager.updateService(req.params.sid, req.body);
+      const updatedService = await servicesService.updateService(req.params.sid, req.body);
       if (!updatedService) {
         return res.status(404).json({ error: 'Servicio no encontrado' });
       }
@@ -63,10 +63,10 @@ export function updateService(serviceManager) {
   };
 }
 
-export function deleteService(serviceManager) {
+export function deleteService(servicesService) {
   return async (req, res) => {
     try {
-      const deletedService = await serviceManager.deleteService(req.params.sid);
+      const deletedService = await servicesService.deleteService(req.params.sid);
       if (!deletedService) {
         return res.status(404).json({ error: 'Servicio no encontrado' });
       }
