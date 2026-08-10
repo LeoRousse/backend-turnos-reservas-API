@@ -1,36 +1,41 @@
-# API inicial de servicios y reservas con FileSystem
-
-## Objetivo
-
-Crear una API REST simple con Express y persistencia en archivos JSON para gestionar servicios y reservas.
+# Backend de turnos y reservas con Node.js, Express y MongoDB
 
 ## Descripción
 
-Esta aplicación ofrece una API básica para:
+API REST para gestionar servicios, reservas y mensajes usando Express y MongoDB/Mongoose.
 
-- gestionar servicios (`services`)
-- gestionar reservas (`bookings`)
-- almacenar datos en archivos JSON en `src/data`
+La aplicación se organiza en capas para separar responsabilidades:
 
-La aplicación ahora sigue una arquitectura en capas para separar responsabilidades:
-
-- `router` define los endpoints y delega en el controller.
-- `controller` recibe `req`, llama al service y responde con `res`.
-- `service` contiene la lógica de negocio.
-- `repository` ofrece acceso a datos sin reglas de negocio.
-- `dao` lee y escribe directamente en los archivos JSON.
+- `src/routes`: define los routers y endpoints.
+- `src/controllers`: procesa las solicitudes y prepara respuestas.
+- `src/services`: contiene la lógica de negocio y validaciones.
+- `src/repositories`: abstrae el acceso a datos.
+- `src/dao`: implementa la persistencia con Mongoose.
+- `src/models`: define los esquemas de MongoDB.
 
 ## Tecnologías
 
 - Node.js
 - Express
+- MongoDB con Mongoose
 - dotenv
 - Módulos ES (`type: module`)
 
+## Requisitos
+
+- Node.js 18+ instalado
+- MongoDB accesible (Atlas o instancia local)
+
 ## Instalación
 
-1. Clona el repositorio o descarga el proyecto.
-2. Ejecuta:
+1. Clona el repositorio:
+
+```bash
+git clone <repositorio>
+cd backend-turnos-reservas-API
+```
+
+2. Instala dependencias:
 
 ```bash
 npm install
@@ -41,57 +46,44 @@ npm install
 ```env
 PORT=8080
 NODE_ENV=development
+MONGO_URI=mongodb+srv://usuario:clave@cluster.mongodb.net/tu-base?retryWrites=true&w=majority
 ```
 
-4. Inicia el servidor:
+4. Inicia la aplicación:
 
 ```bash
 npm start
 ```
 
-## Estructura relevante
+5. Para desarrollo con recarga automática:
 
-- `src/server.js`: arranca el servidor Express.
-- `src/app.js`: configura Express y monta las rutas.
-- `src/routes/services.router.js`: define los endpoints de `services`.
-- `src/routes/bookings.router.js`: define los endpoints de `bookings`.
-- `src/controllers/services.controller.js`: procesa `req` y responde para `services`.
-- `src/controllers/bookings.controller.js`: procesa `req` y responde para `bookings`.
-- `src/services/services.service.js`: contiene la lógica de negocio para servicios.
-- `src/services/bookings.service.js`: contiene la lógica de negocio para reservas y la regla de `quantity`.
-- `src/repositories/services.repository.js`: expone operaciones de acceso para servicios.
-- `src/repositories/bookings.repository.js`: expone operaciones de acceso para reservas.
-- `src/dao/services.dao.js`: lee y escribe `src/data/services.json`.
-- `src/dao/bookings.dao.js`: lee y escribe `src/data/bookings.json`.
+```bash
+npm run dev
+```
 
-## Endpoints de `services`
+## Configuración
+
+- `src/config/env.config.js`: carga variables de entorno.
+- `src/config/database.config.js`: conecta a MongoDB usando Mongoose.
+
+## Endpoints
+
+### Servicios
 
 Base: `/api/services`
 
-### Obtener todos los servicios
+- `GET /api/services`
+  - Obtiene todos los servicios.
+  - Query opcionales:
+    - `category`: filtra por categoría.
+    - `available`: filtra por disponibilidad (`true` o `false`).
 
-- Método: `GET`
-- Ruta: `/api/services`
-- Query opcionales:
-  - `category`: filtra por categoría.
-  - `available`: filtra por disponibilidad (`true` o `false`).
+- `GET /api/services/:sid`
+  - Obtiene un servicio por su id.
 
-Ejemplo:
-
-```bash
-curl "http://localhost:8080/api/services?category=peluqueria&available=true"
-```
-
-### Obtener un servicio por id
-
-- Método: `GET`
-- Ruta: `/api/services/:sid`
-
-### Crear un servicio
-
-- Método: `POST`
-- Ruta: `/api/services`
-- Body JSON obligatorio:
+- `POST /api/services`
+  - Crea un servicio.
+  - Body JSON obligatorio:
 
 ```json
 {
@@ -104,45 +96,19 @@ curl "http://localhost:8080/api/services?category=peluqueria&available=true"
 }
 ```
 
-Ejemplo:
+- `PUT /api/services/:sid`
+  - Actualiza los campos de un servicio existente.
 
-```bash
-curl -X POST http://localhost:8080/api/services \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Corte de pelo","description":"Corte de cabello completo","duration":45,"price":2500,"category":"peluqueria","available":true}'
-```
+- `DELETE /api/services/:sid`
+  - Elimina un servicio por su id.
 
-### Actualizar un servicio
-
-- Método: `PUT`
-- Ruta: `/api/services/:sid`
-- Body JSON con los campos a actualizar:
-
-```json
-{
-  "name": "Corte de pelo premium",
-  "description": "Corte de cabello completo con styling",
-  "duration": 60,
-  "price": 3200,
-  "category": "peluqueria",
-  "available": true
-}
-```
-
-### Eliminar un servicio
-
-- Método: `DELETE`
-- Ruta: `/api/services/:sid`
-
-## Endpoints de `bookings`
+### Reservas
 
 Base: `/api/bookings`
 
-### Crear una reserva
-
-- Método: `POST`
-- Ruta: `/api/bookings`
-- Body JSON obligatorio:
+- `POST /api/bookings`
+  - Crea una reserva.
+  - Body JSON obligatorio:
 
 ```json
 {
@@ -155,37 +121,76 @@ Base: `/api/bookings`
 }
 ```
 
-El campo `services` puede omitirse o enviarse como arreglo vacío.
+- `GET /api/bookings/:bid`
+  - Obtiene una reserva por su id.
 
-### Obtener una reserva por id
+- `POST /api/bookings/:bid/services/:sid`
+  - Agrega un servicio existente a una reserva.
+  - Si el servicio ya está en la reserva, incrementa su `quantity`.
 
-- Método: `GET`
-- Ruta: `/api/bookings/:bid`
+### Mensajes
 
-### Agregar un servicio a una reserva
+Base: `/api/messages`
 
-- Método: `POST`
-- Ruta: `/api/bookings/:bid/services/:sid`
+- `GET /api/messages`
+  - Obtiene todos los mensajes.
 
-Si el servicio ya existe en la reserva, se incrementa su `quantity`.
+- `GET /api/messages/:mid`
+  - Obtiene un mensaje por su id.
 
-## Códigos de respuesta
+- `POST /api/messages`
+  - Crea un mensaje.
+  - Body JSON obligatorio:
 
-- `201` en `POST` cuando se crea un servicio o una reserva.
-- `404` si no existe el `sid` en `GET`, `PUT` o `DELETE` de servicios, o si no existe `bid`/`sid` en reservas.
-- `400` cuando falta el body o hay datos inválidos.
+```json
+{
+  "sender": "Remitente",
+  "recipient": "Destinatario",
+  "subject": "Asunto opcional",
+  "content": "Contenido del mensaje"
+}
+```
+
+- `DELETE /api/messages/:mid`
+  - Elimina un mensaje por su id.
 
 ## Validaciones principales
+
+### Servicios
 
 - `name`: cadena no vacía.
 - `description`: cadena no vacía.
 - `duration`: número positivo.
 - `price`: número mayor o igual a cero.
-- `category`: cadena.
+- `category`: cadena no vacía.
 - `available`: booleano.
+
+### Reservas
+
+- `clientName`: cadena no vacía.
+- `clientEmail`: email válido.
+- `date`: cadena no vacía.
+- `time`: cadena no vacía.
+- `status`: cadena no vacía.
+- `services`: arreglo opcional de objetos `{ service, quantity }`.
+- `quantity`: entero positivo.
+
+### Mensajes
+
+- `sender`: cadena no vacía.
+- `recipient`: cadena no vacía.
+- `content`: cadena no vacía.
+- `subject`: opcional.
+
+## Códigos de respuesta
+
+- `201`: recurso creado.
+- `200`: operación exitosa.
+- `400`: error de validación o body inválido.
+- `404`: recurso no encontrado.
 
 ## Notas
 
-- El `id` de los servicios se genera internamente y no debe enviarse en la solicitud `POST`.
-- Los servicios se almacenan en `src/data/services.json`.
-- El servidor usa el puerto configurado en `.env`.
+- El `id` se genera internamente y no debe enviarse en los `POST`.
+- La aplicación usa MongoDB vía Mongoose; no hay persistencia en archivos JSON en la versión actual.
+- El servidor escucha en el puerto definido por `PORT`.
