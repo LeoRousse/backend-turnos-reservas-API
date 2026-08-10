@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 export class ServicesService {
   constructor(repository) {
     this.repository = repository;
@@ -30,7 +28,6 @@ export class ServicesService {
     }
 
     const service = {
-      id: randomUUID(),
       name: serviceData.name,
       description: serviceData.description,
       duration: serviceData.duration,

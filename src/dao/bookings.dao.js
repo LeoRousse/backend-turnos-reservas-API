@@ -1,29 +1,50 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { BookingModel } from '../models/booking.model.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const bookingsJsonPath = path.join(__dirname, '..', 'data', 'bookings.json');
+function normalizeBooking(document) {
+  if (!document) return null;
+  return {
+    id: String(document._id),
+    clientName: document.clientName,
+    clientEmail: document.clientEmail,
+    date: document.date,
+    time: document.time,
+    status: document.status,
+    services: Array.isArray(document.services)
+      ? document.services.map((item) => ({
+          service: String(item.service),
+          quantity: item.quantity,
+        }))
+      : [],
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
+  };
+}
 
 export class BookingsDao {
-  async readAll() {
-    let raw = '[]';
-    try {
-      raw = await fs.readFile(bookingsJsonPath, 'utf-8');
-    } catch {
-      raw = '[]';
-    }
-
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return [];
-    }
+  async getAll() {
+    const bookings = await BookingModel.find().lean();
+    return bookings.map(normalizeBooking);
   }
 
-  async writeAll(data) {
-    await fs.mkdir(path.dirname(bookingsJsonPath), { recursive: true });
-    await fs.writeFile(bookingsJsonPath, JSON.stringify(data, null, 2), 'utf-8');
+  async getById(id) {
+    if (!id) return null;
+    const booking = await BookingModel.findById(id).lean();
+    return normalizeBooking(booking);
+  }
+
+  async create(data) {
+    const { id, ...bookingData } = data;
+    const booking = await BookingModel.create(bookingData);
+    return normalizeBooking(booking.toObject());
+  }
+
+  async update(data) {
+    const { id, ...bookingData } = data;
+    if (!id) return null;
+    const booking = await BookingModel.findByIdAndUpdate(id, bookingData, {
+      new: true,
+      runValidators: true,
+    }).lean();
+    return normalizeBooking(booking);
   }
 }

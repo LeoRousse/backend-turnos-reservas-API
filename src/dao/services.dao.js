@@ -1,29 +1,51 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { ServiceModel } from '../models/service.model.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const servicesJsonPath = path.join(__dirname, '..', 'data', 'services.json');
+function normalizeService(document) {
+  if (!document) return null;
+  return {
+    id: String(document._id),
+    name: document.name,
+    description: document.description,
+    duration: document.duration,
+    price: document.price,
+    category: document.category,
+    available: document.available,
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
+  };
+}
 
 export class ServicesDao {
-  async readAll() {
-    let raw = '[]';
-    try {
-      raw = await fs.readFile(servicesJsonPath, 'utf-8');
-    } catch {
-      raw = '[]';
-    }
-
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return [];
-    }
+  async getAll() {
+    const services = await ServiceModel.find().lean();
+    return services.map(normalizeService);
   }
 
-  async writeAll(data) {
-    await fs.mkdir(path.dirname(servicesJsonPath), { recursive: true });
-    await fs.writeFile(servicesJsonPath, JSON.stringify(data, null, 2), 'utf-8');
+  async getById(id) {
+    if (!id) return null;
+    const service = await ServiceModel.findById(id).lean();
+    return normalizeService(service);
+  }
+
+  async create(data) {
+    const { id, ...serviceData } = data;
+    const service = await ServiceModel.create(serviceData);
+    return normalizeService(service.toObject());
+  }
+
+  async update(data) {
+    const { id, ...serviceData } = data;
+    if (!id) return null;
+    const service = await ServiceModel.findByIdAndUpdate(id, serviceData, {
+      new: true,
+      runValidators: true,
+    }).lean();
+    return normalizeService(service);
+  }
+
+  async delete(id) {
+    if (!id) return null;
+    const service = await ServiceModel.findByIdAndDelete(id).lean();
+    return normalizeService(service);
   }
 }

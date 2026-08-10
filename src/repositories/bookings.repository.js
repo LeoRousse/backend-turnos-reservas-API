@@ -24,6 +24,9 @@ export class BookingsRepository {
   }
 
   async create(item) {
+    if (typeof this.dao.create === 'function') {
+      return this.dao.create(item);
+    }
     const items = await this._readAll();
     items.push(item);
     await this._writeAll(items);
@@ -38,7 +41,17 @@ export class BookingsRepository {
     return items.find((item) => item.id === id) ?? null;
   }
 
+  async getAll() {
+    if (typeof this.dao.getAll === 'function') {
+      return this.dao.getAll();
+    }
+    return this._readAll();
+  }
+
   async update(item) {
+    if (typeof this.dao.update === 'function') {
+      return this.dao.update(item);
+    }
     const items = await this._readAll();
     const index = items.findIndex((existing) => existing.id === item.id);
     if (index === -1) return null;

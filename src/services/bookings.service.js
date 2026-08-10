@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 function isValidEmail(email) {
   return typeof email === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 }
@@ -33,7 +31,6 @@ export class BookingsService {
     }));
 
     const booking = {
-      id: randomUUID(),
       clientName: bookingData.clientName,
       clientEmail: bookingData.clientEmail,
       date: bookingData.date,
